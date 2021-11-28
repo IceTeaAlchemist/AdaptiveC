@@ -2,7 +2,7 @@
 
 ## Exploring i2c on the Raspberry Pi 3 b+.
 
-Following the Adafruit help filesfor the 16-bit ADC with i2c at 
+Following the Adafruit help files for the 16-bit ADC with i2c at 
 
 https://www.adafruit.com/product/1085
 
