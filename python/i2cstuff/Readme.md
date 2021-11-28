@@ -13,7 +13,7 @@ Circuit Python is Pip installable, https://pypi.org/search/?q=adafruit-circuitpy
 Blinka libraries https://circuitpython.org/blinka .
 
 Found<br>
-sudo pip3 install adafruit-circuitpython-ads1x15
+sudo pip3 install adafruit-circuitpython-ads1x15 <br>
 and the website <br>
 https://pypi.org/project/adafruit-circuitpython-ads1x15/
 
