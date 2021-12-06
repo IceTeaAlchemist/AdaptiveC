@@ -1,0 +1,9 @@
+This folder contains c++ prototypes for the i2c bus for the adaptive PCR project. 
+
+These all require linking the wiringPi library--the original installation is deprecated and thus all tutorials for installing it are flawed, you need to find it from here: https://github.com/WiringPi/WiringPi
+
+Be sure to enable i2c communications on the Pi or none of this will work.
+
+I highly suggest at least taking the i2creset code. Running it sends a command that will reset the ads1115 to its default settings.
+
+WATCH ENDIANNESS.
