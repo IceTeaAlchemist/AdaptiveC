@@ -11,10 +11,12 @@
 # are 9.81KOhm, 0.988K and sum to 10.80K...ideal divider ratio is 0.988/10.80 = 0.915, so 
 # that 6.06V becomes 0.554V.  Looks pretty close!!
 
-import time, datetime
+import datetime
+import time
+
+import adafruit_ads1x15.ads1115 as ADS  # ADS1015 is 12-bit, ADS1115 is 16-bit (using these)
 import board
 import busio
-import adafruit_ads1x15.ads1115 as ADS  # ADS1015 is 12-bit, ADS1115 is 16-bit (using these)
 from adafruit_ads1x15.analog_in import AnalogIn
 
 # Create the I2C bus
@@ -22,23 +24,46 @@ i2c = busio.I2C(board.SCL, board.SDA)
 print('board.SCL, board.SDA are {}'.format( (board.SCL, board.SDA) ) )
 
 # Create the ADC object using the I2C bus
-ads = ADS.ADS1115(i2c)
+ads0 = ADS.ADS1115(i2c, address=0x48)
+ads1 = ADS.ADS1115(i2c, address=0x49)
 
 # Create single-ended input on channel 0
-chan = AnalogIn(ads, ADS.P0)
-chan1 = AnalogIn(ads, ADS.P1)
+chan00 = AnalogIn(ads0, ADS.P0)
+chan01 = AnalogIn(ads0, ADS.P1)
+
+chan10 = AnalogIn(ads1, ADS.P0)
+chan11 = AnalogIn(ads1, ADS.P1)
 
 # Create differential input between channel 0 and 1
 # chan = AnalogIn(ads, ADS.P0, ADS.P1)
 
-print("{:>5}\t{:>5}\t{:>5}\t{:>5}".format('raw', 'v', 'deg C', 'deg F'))
+print("{:>5}\t{:>5}\t{:>5}\t{:>5}\t{:>5}\t{:>5}\t{:>5}".format(
+    'raw', 'raw1', 'v', 'v1',  'deg C', 'deg F', 'time'))
+
+icnt = 0
+printAds0 = True; nxttext = '0x48'
+print('========== {} ==============='.format(nxttext))
 
 while True:
-    val, volt, val1, volt1 = (chan.value, chan.voltage, chan1.value, chan1.voltage)
-    tempC = (volt - 1.25)/0.005
+    if printAds0:
+        a0 = chan00; a1 = chan01
+        nxttext = '0x49'
+    else:
+        a0 = chan10; a1 = chan11
+        nxttext = '0x48'
+    
+    val0, volt0, val1, volt1 = (a0.value, a0.voltage, 
+                                    a1.value, a1.voltage)
+    tempC = (volt0 - 1.25)/0.005
     tempF = tempC*1.8 + 32.0
     atime = time.strftime( '%H%M%S.%u', time.localtime() )
     print("{:>5}\t{:>5}\t{:>5.3f}\t{:>5.3}\t{:>5.3f}\t{:>5.3f}\t{}"
-    .format(val, val1, volt, volt1, tempC, tempF, atime) )
+    .format(val0, val1, volt0, volt1, tempC, tempF, atime) )
     time.sleep(5)
+
+    if icnt%3 == 0 and icnt != 0:
+        printAds0 = not printAds0
+        print('========== {} ==============='.format(nxttext))
+    icnt += 1
+       
 

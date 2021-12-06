@@ -1,0 +1,9 @@
+Notes about the RPi 3 b+ setup of Bill's and the ADC 1115s.
+
+20211205 weg
+ADC of the 4x AA batteries on a voltage divider nomially 1k and 10k 
+for a 1/11 divider.  Was 0.538 (though DMM meas 0.534Vdc) and now
+0.528 Vdc on the ADC no. 1 and DMM is 0.525 and on the full voltage 5.73V.
+Divider is 0.0916 (vs ideal of 1/11 = 0.909).  Or actual measurements of
+0.528/5.73 = 0.09215.
+
