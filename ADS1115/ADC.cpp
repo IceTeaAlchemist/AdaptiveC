@@ -11,21 +11,36 @@
 
 using namespace std;
 
+/*
+ * Default constructor for the ADC. It must be declared with an address.
+ * int addr: I2C Address where the ADS1115 is communicating.
+ * 
+ */
+
 adc::adc(int addr)
 {
 	address = addr;
 	highthresh = 0x7FFF;
 	lowthresh = 0x8000;
 	config = {0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,1};
+	gainvoltage = 2.048;
 	adcsetup();
 }
 
+/*
+ * Constructor that sets the high threshold and low threshold.
+ * int addr: I2C address where the ADS 1115 is communicating.
+ * int ht: High threshold of the comparator.
+ * int lt: Low threshold of the comparator.
+ */
+
 adc::adc(int addr, int ht, int lt)
 {
-	address = addr
+	address = addr;
 	highthresh = ht;
 	lowthresh = lt;
 	config = {0,0,0,0,0,1,0,1,1,0,0,0,0,0,1,1};
+	gainvoltage = 2.048;
 	adcsetup();
 }
 
@@ -51,6 +66,146 @@ void adc::writeconfig()
 		place = place/2;
 	}
 	wiringPiI2CWriteReg16(pihandle,CONFIG, __bswap_16(reg));
+}
+
+void adc::StartConversion()
+{
+	config[0] = 1;
+	writeconfig();
+}
+
+void adc::SetMultiplex(int up)
+{
+	SetMultiplex(up, -1);
+}
+
+void adc::SetMultiplex(int up,int down)
+{
+	if(up == 0 && down == 1)
+	{
+		config[1] = 0;
+		config[2] = 0;
+		config[3] = 0;
+		writeconfig();
+	} 
+	else if(up == 0 && down == 3)
+	{
+		config[1] = 0;
+		config[2] = 0;
+		config[3] = 1;
+		writeconfig();
+	}
+	else if(up == 1 && down == 3)
+	{
+		config[1] = 0;
+		config[2] = 1;
+		config[3] = 0;
+		writeconfig();
+	}
+	else if(up == 2 && down == 3)
+	{
+		config[1] = 0;
+		config[2] = 1;
+		config[3] = 1;
+		writeconfig();
+	}
+	else if(up == 0 && down == -1)
+	{
+		config[1] = 1;
+		config[2] = 0;
+		config[3] = 0;
+		writeconfig();
+	}
+	else if(up == 1 && down == -1)
+	{
+		config[1] = 1;
+		config[2] = 0;
+		config[3] = 1;
+		writeconfig();
+	}
+	else if(up == 2 && down == -1)
+	{
+		config[1] = 1;
+		config[2] = 1;
+		config[3] = 0;
+		writeconfig();
+	}
+	else if(up == 3 && down == -1)
+	{
+		config[1] = 1;
+		config[2] = 1;
+		config[3] = 1;
+		writeconfig();
+	}
+	else
+	{
+		cout << "Invalid multiplex configuration. Valid combos are 0 and 1, any value and 3 or ground." << endl;
+	}
+}
+
+void adc::SetGain(int gain)
+{
+	switch (gain)
+	{
+	case 0:
+		config[4] = 0;
+		config[5] = 0;
+		config[6] = 0;
+		gainvoltage = 6.144;
+		writeconfig();
+		break;
+	case 1:
+		config[4] = 0;
+		config[5] = 0;
+		config[6] = 1;
+		gainvoltage = 4.096;
+		writeconfig();
+		break;
+	case 2:
+		config[4] = 0;
+		config[5] = 1;
+		config[6] = 0;
+		gainvoltage = 2.048;
+		writeconfig();
+		break;
+	case 3:
+		config[4] = 0;
+		config[5] = 1;
+		config[6] = 1;
+		gainvoltage = 1.024;
+		writeconfig();
+		break;
+	case 4:
+		config[4] = 1;
+		config[5] = 0;
+		config[6] = 0;
+		gainvoltage = 0.512;
+		writeconfig();
+		break;
+	case 5:
+		config[4] = 1;
+		config[5] = 0;
+		config[6] = 1;
+		gainvoltage = 0.256;
+		writeconfig();
+		break;
+	case 6:
+		config[4] = 1;
+		config[5] = 1;
+		config[6] = 0;
+		gainvoltage = 0.256;
+		writeconfig();
+		break;
+	case 7:
+		config[4] = 1;
+		config[5] = 1;
+		config[6] = 1;
+		gainvoltage = 0.256;
+		writeconfig();
+		break;
+	default:
+		cout << "Invalid gain selected. Please use 0 - 7. Write cancelled." << endl;
+	}
 }
 
 void adc::SetMode(int mode)
@@ -209,4 +364,48 @@ void adc::SetCompQueue(int que)
 	default:
 		cout << "Invalid comparator queue. Write canceled." << endl;
 	}
+}
+
+int adc::getreading()
+{
+	int reading = __bswap_16(wiringPiI2CReadReg16(pihandle,CONVERSION));
+	return reading;
+}
+
+int adc::gethighthresh()
+{
+	return highthresh;
+}
+
+int adc::getlowthresh()
+{
+	return lowthresh;
+}
+
+int adc::getconfig()
+{
+	int readconfig = __bswap_16(wiringPiI2CReadReg16(pihandle,CONFIG));
+	int reg = 0;
+	int place = 32768;
+	for(int i = 0; i < 16; i++)
+	{
+		reg += place * config[i];
+		place = place/2;
+	}
+	if(reg != readconfig)
+	{
+		cout << "Register and class mismatch." << endl;
+		return -1;
+	}
+	else
+	{
+		return readconfig;
+	}
+}
+
+adc::~adc()
+{
+	int resetd = wiringPiI2CSetup(0x00);
+	wiringPiI2CWrite(resetd, 0b00000110);
+	cout << "ADC reset and turned off." << endl;
 }

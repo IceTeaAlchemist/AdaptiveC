@@ -1,20 +1,23 @@
 #ifndef ADC_h
 #define ADC_h
+#include <array>
 
 class adc
 {
 	private:
 		int address;
-		int config[16];
+		std::array<int,16> config;
 		int highthresh;
 		int lowthresh;
 		int pihandle;
+		float gainvoltage;
 		void writeconfig();
 		void adcsetup();
 	public:
 		adc(int addr);
 		adc(int addr, int ht, int lt);
-
+		
+		void StartConversion();
 		void SetMultiplex(int up, int down);
 		void SetMultiplex(int up);
 		void SetGain(int gain);
@@ -32,4 +35,6 @@ class adc
 		int getconfig();
 
 		~adc();
-}
+};
+
+#endif
