@@ -1,0 +1,5 @@
+This is a C++/C library for controlling the QIAGEN ESELOG detector with a Raspberry Pi. This will probably ONLY work on Linux.
+
+Additional functions can be added through adding shells with hard coded values to the generic qiagenread/qiagenwrite functions.
+
+An example of both reading and writing is in qiagenlibrarytest.cpp.
