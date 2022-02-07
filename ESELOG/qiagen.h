@@ -24,6 +24,9 @@ class qiagen
 		string listen();
 		void LED_on(int LED);
 		void LED_off(int LED);
+		void LED_power(int LED, unsigned int power);
+		void LED_max(int LED, unsigned int max);
+		void LED_min(int LED, unsigned int min);
 		string readqiagen(unsigned int reg, unsigned int regs_to_read);
 		string writeqiagen(unsigned int reg, vector<unsigned int> data);
 		~qiagen();

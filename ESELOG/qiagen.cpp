@@ -176,6 +176,48 @@ void qiagen::LED_off(int LED)
 	
 }
 
+//Sets the power for the requested LED.
+void qiagen::LED_power(int LED, unsigned int power)
+{
+	if(LED == 1)
+	{
+		writeqiagen(24, {power,00});
+	}
+	if(LED == 2)
+	{
+		writeqiagen(25, {power,00});
+	}
+	
+}
+
+// Sets the minimum power for the requested LED.
+void qiagen::LED_min(int LED, unsigned int min)
+{
+	if(LED == 1)
+	{
+		writeqiagen(30, {min,00});
+	}
+	if(LED == 2)
+	{
+		writeqiagen(31, {min,00});
+	}
+	
+}
+
+// Sets the maximum power for the requested LED.
+void qiagen::LED_max(int LED, unsigned int max)
+{
+	if(LED == 1)
+	{
+		writeqiagen(28, {max,00});
+	}
+	if(LED == 2)
+	{
+		writeqiagen(29, {max,00});
+	}
+	
+}
+
 //Closes the serial port. In the future it might be a good idea to have it also return the qiagen to default settings (i.e turning the LEDs off).
 qiagen::~qiagen()
 {
