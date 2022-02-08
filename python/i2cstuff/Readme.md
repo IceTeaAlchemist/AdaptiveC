@@ -17,6 +17,9 @@ sudo pip3 install adafruit-circuitpython-ads1x15 <br>
 and the website <br>
 https://pypi.org/project/adafruit-circuitpython-ads1x15/
 
+Enable the i2c options, follow https://learn.adafruit.com/adafruits-raspberry-pi-lesson-4-gpio-setup/configuring-i2c .
+sudo raspi-config     Interfacing Options and i2c > choose Yes, Yes, to Enable and Load Kernel.
+
 So far working fine.
 
 Also worked through the interrupt vs polling that Franz suggested at<br>
