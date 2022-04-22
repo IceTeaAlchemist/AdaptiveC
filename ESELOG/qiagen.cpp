@@ -54,6 +54,7 @@ qiagen::qiagen(string serial)
 			cout << "Error setting attributes: " << strerror(errno) << endl;
 		}
 		address = 0;
+		active_method = 1;
 	}
 }
 
@@ -101,7 +102,7 @@ string qiagen::assemble(unsigned int reg, char rw, vector<unsigned int> command)
 	ss << setfill('0') << setw(2) << hex << checksum;
 	result.append(ss.str());
 	result.append("\r\n");
-	cout << "Command: " << result << endl;
+//	cout << "Command: " << result << endl;
 	return result;
 }
 
@@ -117,9 +118,12 @@ string qiagen::listen()
 	{
 		i++;
 		read(serial_port, &in, sizeof(in));
-		appender.append(1,in);
-	} while (in != '\r' && in != '\n');
-	cout << dec  << i << " bytes heard." << endl;
+		if(in !='\r' && in != '\n' && in != ':')
+		{
+			appender.append(1,in);
+		}
+	} while (in != '\n');
+//	cout << dec  << i << " bytes heard." << endl;
 	return appender;
 }
 
@@ -218,8 +222,46 @@ void qiagen::LED_max(int LED, unsigned int max)
 	
 }
 
+/*Sets the LED and detector used. Check the manual for a key, but for practical usage:
+ * 1 - E1D1
+ * 2 - E1D2
+ * 3 - E2D2 */
+void qiagen::setMethod(unsigned int method)
+{
+	active_method = method;
+	writeqiagen(03, {method,00});
+}
+
+void qiagen::setMode(unsigned int mode)
+{
+	writeqiagen(02, {mode,00});
+}
+
+void qiagen::startMethod()
+{
+	writeqiagen(512, {00, 01});
+}
+
+void qiagen::stopMethod()
+{
+	writeqiagen(513, {00,01});
+}
+
+double qiagen::measure()
+{
+	string val = readqiagen(260+(active_method-1)*2,2);
+	int store = stoul(val.substr(6,8),nullptr,16);
+	double fluor = store*2500.0/8388607.0;
+	cout << "Val: " << fluor << endl;
+	return fluor;
+} 
+	
+		
+
 //Closes the serial port. In the future it might be a good idea to have it also return the qiagen to default settings (i.e turning the LEDs off).
 qiagen::~qiagen()
 {
+	LED_off(1);
+	LED_off(2);
 	close(serial_port);
 }
